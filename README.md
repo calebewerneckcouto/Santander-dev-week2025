@@ -34,10 +34,10 @@ classDiagram
         +String description
     }
 
-    User --> Account
-    User --> "many" Feature
-    User --> Card
-    User --> "many" News
+    User *-- Account
+    User *-- "many" Feature
+    User *-- Card
+    User *-- "many" News
 
 ```
 
