@@ -16,7 +16,7 @@ public class Card {
 	private Long id;
 	@Column(unique = true)
 	private String number;
-	@Column(name="available_limit" ,  precision = 2, scale = 13) // scale quantidade de numeros colocados....
+	@Column(name="available_limit" ,  precision = 13, scale = 2) // scale quantidade de numeros colocados....
 	private BigDecimal limit;
 
 	public Card() {

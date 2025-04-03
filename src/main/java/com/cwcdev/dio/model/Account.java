@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 
 @Entity(name = "tb_account")
 public class Account {
@@ -20,10 +21,13 @@ public class Account {
 
 	private String agency;
 
-	@Column(precision = 2, scale = 13) // scale quantidade de numeros colocados....
+	@Column(precision = 13, scale = 2) // scale quantidade de numeros colocados....
 	private BigDecimal balance;
-	@Column(name="additional_limit" ,precision = 2, scale = 13) // scale quantidade de numeros colocados....
+	@Column(name="additional_limit" ,precision = 13, scale = 2) // scale quantidade de numeros colocados....
 	private BigDecimal limit;
+	
+	@Version
+    private Integer version;
 
 	public Account() {
 
@@ -76,6 +80,14 @@ public class Account {
 
 	public void setLimit(BigDecimal limit) {
 		this.limit = limit;
+	}
+	
+	public Integer getVersion() {
+		return version;
+	}
+	
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 	@Override
