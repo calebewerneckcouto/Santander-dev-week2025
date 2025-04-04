@@ -36,7 +36,12 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// Adiciona o atributo Main-Class no manifest do JAR
+// Garante que o .jar seja criado com o nome fixo "app.jar"
+tasks.named('bootJar') {
+    archiveFileName = "app.jar"
+}
+
+// Define a classe principal para execução do JAR
 tasks.jar {
     manifest {
         attributes(
