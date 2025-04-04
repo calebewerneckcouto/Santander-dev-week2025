@@ -36,6 +36,15 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Adiciona o atributo Main-Class no manifest do JAR
+tasks.jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.cwcdev.dio.SantanderDevWeek2025Application'
+        )
+    }
+}
+
 // Adiciona a flag -parameters para manter os nomes dos argumentos
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add("-parameters")

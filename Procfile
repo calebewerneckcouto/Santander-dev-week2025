@@ -1,0 +1,1 @@
+web: java -jar /santander-dev-week-2025/gradle/wrapper/gradle-wrapper.jar
