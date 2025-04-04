@@ -1,9 +1,17 @@
 package com.cwcdev.dio.controller;
 
 import java.net.URI;
+import java.util.NoSuchElementException;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.cwcdev.dio.model.User;
@@ -30,31 +38,39 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Requisição inválida")
     })
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User userToCreate) {
-        System.out.println("UserController.create() - Recebido: " + userToCreate);
+    public ResponseEntity<?> create(@RequestBody User userToCreate) {
+        try {
+            if (userToCreate == null || userToCreate.getAccount() == null) {
+                return ResponseEntity.badRequest().body("Usuário ou Conta não podem ser nulos.");
+            }
 
-        if (userToCreate != null && userToCreate.getAccount() != null) {
-            System.out.println("Conta associada - ID: " + userToCreate.getAccount().getId());
+            System.out.println("Criando usuário com conta associada - ID: " + userToCreate.getAccount().getId());
+
+            User userCreated = userService.create(userToCreate);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(userCreated.getId()).toUri();
+
+            return ResponseEntity.created(location).body(userCreated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        var userCreated = userService.create(userToCreate);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(userCreated.getId()).toUri();
-
-        return ResponseEntity.created(location).body(userCreated);
     }
 
     @Operation(summary = "Busca um usuário por ID", responses = {
             @ApiResponse(responseCode = "200", description = "Usuário encontrado", content = @Content(schema = @Schema(implementation = User.class))),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<User> findById(
-            @Parameter(description = "ID do usuário a ser buscado", required = true) 
-            @PathVariable Long id) {
-        var user = userService.findById(id);
-        return ResponseEntity.ok(user);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findById(
+            @Parameter(description = "ID do usuário a ser buscado", required = true)
+            @PathVariable(name = "id") Long id) {
+        try {
+            User user = userService.findById(id);
+            return ResponseEntity.ok(user);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Atualiza um usuário por ID", responses = {
@@ -62,24 +78,34 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida")
     })
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<User> update(
-            @Parameter(description = "ID do usuário a ser atualizado", required = true) 
-            @PathVariable Long id,
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(
+            @Parameter(description = "ID do usuário a ser atualizado", required = true)
+            @PathVariable(name = "id") Long id,
             @RequestBody User userToUpdate) {
-        var updatedUser = userService.update(id, userToUpdate);
-        return ResponseEntity.ok(updatedUser);
+        try {
+            User updatedUser = userService.update(id, userToUpdate);
+            return ResponseEntity.ok(updatedUser);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @Operation(summary = "Deleta um usuário por ID", responses = {
             @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "ID do usuário a ser deletado", required = true) 
-            @PathVariable Long id) {
-        userService.delete(id);
-        return ResponseEntity.noContent().build();
+            @Parameter(description = "ID do usuário a ser deletado", required = true)
+            @PathVariable(name = "id") Long id) {
+        try {
+            userService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
